@@ -130,6 +130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9cc9d48a7f8a64b8759eb00df8a2de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sparkFx: {fileID: 2379830179813025156, guid: 0ef75fe1717563c4e84f875b8eb25316, type: 3}
 --- !u!135 &8828519438678678880
 SphereCollider:
   m_ObjectHideFlags: 0

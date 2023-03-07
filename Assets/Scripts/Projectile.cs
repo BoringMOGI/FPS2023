@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    const float MAX_DISTANCE = 1000f;
+    [SerializeField] ParticleSystem sparkFx;
+
+    const float MAX_DISTANCE = 100f;
 
     float power;
     float speed;
@@ -34,18 +36,24 @@ public class Projectile : MonoBehaviour
         // LayerMask에 포함되어 있는지 &(앤드)연산을 통해 검출한다.
         if((mask.value & 1 << other.gameObject.layer) > 0)
         {
-            Debug.Log($"충돌함:{other.name}");
-            Destroy(gameObject);
+            OnHit(other.gameObject);
         }
     }
 
+    // FPS(프레임)기준으로 호출되는 함수.
     void Update()
     {
-        // 투사체가 최대 이동 거리를 넘어버리면 삭제.
-        if(Vector3.Distance(createPosition, transform.position) >= MAX_DISTANCE)
+        RaycastHit hit;
+        Vector3 nextPoint = transform.position + transform.forward * speed * Time.deltaTime;
+        if (Physics.Linecast(transform.position, nextPoint, out hit, mask))
         {
-            Destroy(gameObject);
+            OnHit(hit.collider.gameObject);
         }
+        else if (Vector3.Distance(createPosition, transform.position) >= MAX_DISTANCE)
+        {
+            // 투사체가 최대 이동 거리를 넘어버리면 삭제.
+            Destroy(gameObject);
+        }   
         else
         {
             // Translate는 내 기준 z축으로 forward 방향이 정면.
@@ -53,5 +61,12 @@ public class Projectile : MonoBehaviour
             transform.Translate(Vector3.forward * speed * Time.deltaTime);
             //transform.position += (transform.forward * speed * Time.deltaTime);
         }
+    }
+
+    private void OnHit(GameObject target)
+    {
+        ParticleSystem vfx = Instantiate(sparkFx, transform.position, transform.rotation);
+        vfx.Play();
+        Destroy(gameObject);
     }
 }
