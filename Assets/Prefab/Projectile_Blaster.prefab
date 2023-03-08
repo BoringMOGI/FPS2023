@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4571218798354419571}
   - component: {fileID: 4571218798357811027}
   - component: {fileID: 4571218798356843923}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Mesh_Projectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 657295359066450110}
   - component: {fileID: 8828519438678678880}
   - component: {fileID: 4872444070224475922}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Projectile_Blaster
   m_TagString: Untagged
   m_Icon: {fileID: 0}

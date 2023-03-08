@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class WeaponBlaster : Weapon
@@ -11,6 +12,8 @@ public class WeaponBlaster : Weapon
 
         float totalEnergy;
         float energy;
+
+        public float Energy => energy;
 
         public void Start(float _energy)
         {
@@ -56,7 +59,7 @@ public class WeaponBlaster : Weapon
     float nextFireTime;         // 다음 공격 가능 시간.
     float nextChageTime;        // 다음 충전 가능 시간.
 
-    private void Start()    
+    private void Start() 
     {
         // 총 에너지 양을 n등분하여 소켓에게 전달.
         float energy = totalEnergy / sockets.Length;
@@ -66,12 +69,21 @@ public class WeaponBlaster : Weapon
 
     private void Update()
     {
+        UpdateWeapon();
+        UpdateCrosshair();
+
+        weaponUi.SwitchSelected(true);
+    }
+
+    // 무기 로직.
+    private void UpdateWeapon()
+    {
         // 충전이 가능한 시간이 되었다는 것을 의미.
         if (nextChageTime <= Time.time)
         {
             // 4번 소캣부터 거꾸로 충전해야함을 알려준다.
             // 충전을 했다면 true를 반환한다.
-            for(int i = sockets.Length - 1; i >= 0; i--)
+            for (int i = sockets.Length - 1; i >= 0; i--)
             {
                 if (sockets[i].Charge())
                     break;
@@ -81,8 +93,21 @@ public class WeaponBlaster : Weapon
         // 모든 에너지 소켓의 Update함수 호출.
         foreach (var socket in sockets)
             socket.Update();
+
+        // 무기 UI.
+        float currentEnergy = sockets.Select(s => s.Energy).Sum();      // 모든 소캣의 현재 에너지를 가져와 합산한다.
+        weaponUi.UpdateFill(currentEnergy, totalEnergy);                // 현재 에너지와 총 에너지를 전달한다.
+    }
+    private void UpdateCrosshair()
+    {
+        GameObject hitTarget = GetCameraHitTarget();   // 카메라 정면 타겟 대입.
+        if(hitTarget?.GetComponent<IHit>() != null)    // 타겟이 있고 해당 타겟이 IHit을 구현했다면?
+            Crosshair.Instance.Switch(true);
+        else
+            Crosshair.Instance.Switch(false);
     }
 
+    // 마우스 컨트롤.
     public override void Press(MOUSE mouse)
     {
         // 에너지 소비.
@@ -113,7 +138,6 @@ public class WeaponBlaster : Weapon
         muzzleFlashFx.Play();
         shotAudio.Play();
     }
-
     public override void Release(MOUSE mouse)
     {
 
