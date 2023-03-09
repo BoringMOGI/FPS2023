@@ -15,6 +15,7 @@ public class WeaponUI : MonoBehaviour
     // readonly : 상수화. 생겨나는 시점이 런타임 간계.
     readonly Vector3 SIZE_UP = new Vector3(0.3f, 0.3f, 0.3f);
 
+
     Coroutine update;
     float sizeTime;
 
@@ -65,7 +66,7 @@ public class WeaponUI : MonoBehaviour
         fillImage.fillAmount = ratio;
 
         // 색상. 에너지를 다 쓰면 빨강이다.
-        Color color = (ratio <= 0.2f) ? new Color(.4f, .1f, .1f) : Color.black;
+        Color color = (ratio <= 0.2f) ? new Color(.8f, .1f, .1f) : Color.black;
         color.a = backImage.color.a;
         backImage.color = color;
     }

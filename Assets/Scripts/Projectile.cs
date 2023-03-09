@@ -67,6 +67,10 @@ public class Projectile : MonoBehaviour
     {
         ParticleSystem vfx = Instantiate(sparkFx, transform.position, transform.rotation);
         vfx.Play();
+
+        // 충돌한 대상이 IHit을 구현하고 있다면 OnHit함수를 호출해 피격 처리.
+        target.GetComponent<IHit>()?.OnHit(power);
+
         Destroy(gameObject);
     }
 }
