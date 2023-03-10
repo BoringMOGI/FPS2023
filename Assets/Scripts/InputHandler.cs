@@ -28,6 +28,10 @@ public class InputHandler : MonoBehaviour
     KeyCode jump;
     KeyCode run;
 
+    KeyCode changeWeapon1;
+    KeyCode changeWeapon2;
+    KeyCode changeWeapon3;
+
     private void Awake()
     {
         // PlayerPrefs : 윈도우에 레지스트리 값으로 기본 자료형을 저장
@@ -42,6 +46,10 @@ public class InputHandler : MonoBehaviour
         jump = (KeyCode)PlayerPrefs.GetInt("KEY_JUMP", (int)KeyCode.Space);
         run = (KeyCode)PlayerPrefs.GetInt("KEY_RUN", (int)KeyCode.LeftShift);
 
+        changeWeapon1 = (KeyCode)PlayerPrefs.GetInt("KEY_CHANGE_WEAPON_1", (int)KeyCode.Alpha1);
+        changeWeapon2 = (KeyCode)PlayerPrefs.GetInt("KEY_CHANGE_WEAPON_2", (int)KeyCode.Alpha2);
+        changeWeapon3 = (KeyCode)PlayerPrefs.GetInt("KEY_CHANGE_WEAPON_3", (int)KeyCode.Alpha3);
+
         // 마우스 커서 가리기 & 고정.
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
@@ -54,6 +62,7 @@ public class InputHandler : MonoBehaviour
     public bool isRun;
     public MOUSE_STATE mouseFire;
     public MOUSE_STATE mouseZoom;
+    public int changeWeaponIndex;
 
 
     // 만약에 설정창에서 키보드에 단축키에 대한 교체가 있다.
@@ -98,6 +107,17 @@ public class InputHandler : MonoBehaviour
                 mouseZoom = MOUSE_STATE.Pressed;
             else if (Input.GetKeyUp(zoom))
                 mouseZoom = MOUSE_STATE.Realease;
+
+            // 무기 변경 키.
+            if (Input.GetKeyDown(changeWeapon1))
+                changeWeaponIndex = 1;
+            else if (Input.GetKeyDown(changeWeapon2))
+                changeWeaponIndex = 2;
+            else if (Input.GetKeyDown(changeWeapon3))
+                changeWeaponIndex = 3;
+            else
+                changeWeaponIndex = 0;
+
         }
 
         moveDirection.Normalize();

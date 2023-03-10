@@ -67,17 +67,12 @@ public class WeaponBlaster : Weapon
             socket.Start(energy);
     }
 
-    private void Update()
+    // 상속 class인 Weapon에도 Update가 구현되어있기 때문에
+    // new 연산자를 써서 둘은 다르다는 것을 표기.
+    protected new void Update()
     {
-        UpdateWeapon();
-        UpdateCrosshair();
+        base.Update();      // Weapon 클래스에 구현된 Update를 호출.
 
-        weaponUi.SwitchSelected(true);
-    }
-
-    // 무기 로직.
-    private void UpdateWeapon()
-    {
         // 충전이 가능한 시간이 되었다는 것을 의미.
         if (nextChageTime <= Time.time)
         {
@@ -95,17 +90,10 @@ public class WeaponBlaster : Weapon
             socket.Update();
 
         // 무기 UI.
-        float currentEnergy = sockets.Select(s => s.Energy).Sum();      // 모든 소캣의 현재 에너지를 가져와 합산한다.
-        weaponUi.UpdateFill(currentEnergy, totalEnergy);                // 현재 에너지와 총 에너지를 전달한다.
+        // 모든 소캣의 현재 에너지를 가져와 합산한다.
+        energy = sockets.Select(s => s.Energy).Sum();      
     }
-    private void UpdateCrosshair()
-    {
-        GameObject hitTarget = GetCameraHitTarget();   // 카메라 정면 타겟 대입.
-        if(hitTarget?.GetComponent<IHit>() != null)    // 타겟이 있고 해당 타겟이 IHit을 구현했다면?
-            Crosshair.Instance.Switch(true);
-        else
-            Crosshair.Instance.Switch(false);
-    }
+      
 
     // 마우스 컨트롤.
     public override void Press(MOUSE mouse)
@@ -116,7 +104,7 @@ public class WeaponBlaster : Weapon
         {
             if(socket.Use())                    // n번째 소켓에게 에너지를 사용했는지 물어본다.
             {
-                isEmptyEnergy = false;          // 사용했다면 에너지가 비어있다는 변수를 flase로 만든다.
+                isEmptyEnergy = false;          // 사용했다면 에너지가 비어있다는 변수를 false로 만든다.
                 break;                          // 더 검색할 필요가 없으니 foreach문을 빠져나온다.
             }
         }
@@ -133,7 +121,7 @@ public class WeaponBlaster : Weapon
         // 투사체 생성 후 발사.
         Projectile projectile = Instantiate(projectilePrefab, muzzle.position, Quaternion.identity);
         projectile.transform.LookAt(GetCameraPoint());      // 특정 지점을 바라봐라.
-        projectile.Fire(power, speed, mask);
+        projectile.Fire(Projectile.TYPE.Bullet, power, speed, mask);
 
         muzzleFlashFx.Play();
         shotAudio.Play();
