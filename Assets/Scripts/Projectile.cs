@@ -4,43 +4,33 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    public enum TYPE
-    {
-        Bullet,     // 직선.
-        Grenade,    // 포물선.
-    }
+    [SerializeField] protected ParticleSystem sparkFx;        // 충돌 이펙트.
 
+    protected const float MAX_DISTANCE = 100f;    // 최대 거리.
+    protected const float GRAVITY = -9.81f;       // 중력.
 
-    [SerializeField] ParticleSystem sparkFx;
+    protected float power;              // 데미지.
+    protected float speed;              // 속도.
+    protected LayerMask mask;           // 레이어 마스크.
+    protected Vector3 createPosition;   // 생성 지점.
+    protected Vector3 velocity;         // 중력 가속도.
 
-    const float MAX_DISTANCE = 100f;
+    protected bool isFire;              // 발사 여부.
 
-    float power;
-    float speed;
-    LayerMask mask;
-    TYPE type;
-
-    Vector3 createPosition;     // 생성 지점.
-
-    private void Start()
+    public void Fire(float power, float speed, LayerMask mask)
     {
         createPosition = transform.position;
-    }
 
-    public void Fire(TYPE type, float power, float speed, LayerMask mask)
-    {
-        this.type = type;
         this.power = power;
         this.speed = speed;
         this.mask = mask;
+
+        isFire = true;
     }
 
     // 무언가랑 충돌했을 때.
     private void OnTriggerEnter(Collider other)
     {
-        if (type != TYPE.Bullet)
-            return;
-
         // GameObject.layer : layer목록 중 몇번째인지를 의미 (int정수)
         // LayerMask : 레이어 목록을 여러개 가지고 있을 수 있는 flag값 (int정수)
 
@@ -53,23 +43,18 @@ public class Projectile : MonoBehaviour
     }
 
     // FPS(프레임)기준으로 호출되는 함수.
-    void Update()
+    protected void Update()
     {
-        switch(type)
-        {
-            case TYPE.Bullet:
-                UpdateBullet();
-                break;
-            case TYPE.Grenade:
-                UpdateGrenade();
-                break;
-        }
-    }
+        if (!isFire)
+            return;
 
-    private void UpdateBullet()
-    {
         RaycastHit hit;
+
+        // 다음 위치는 나의 운동량 + 중력 가속도.
+        // 그러나 일반 Bullet은 중력값을 받지 않는다.
         Vector3 nextPoint = transform.position + transform.forward * speed * Time.deltaTime;
+        nextPoint += velocity;
+
         if (Physics.Linecast(transform.position, nextPoint, out hit, mask))
         {
             OnHit(hit.collider.gameObject);
@@ -81,18 +66,12 @@ public class Projectile : MonoBehaviour
         }
         else
         {
-            // Translate는 내 기준 z축으로 forward 방향이 정면.
-            // position은 월드 기준 정면이 정면.
-            transform.Translate(Vector3.forward * speed * Time.deltaTime);
-            //transform.position += (transform.forward * speed * Time.deltaTime);
+            transform.LookAt(nextPoint);            // 다음으로 움직일 위치를 바라본다.
+            transform.position = nextPoint;         // 이후 내 실제 위치를 변경한다.
         }
     }
-    private void UpdateGrenade()
-    {
 
-    }
-
-    private void OnHit(GameObject target)
+    protected virtual void OnHit(GameObject target)
     {
         ParticleSystem vfx = Instantiate(sparkFx, transform.position, transform.rotation);
         vfx.Play();

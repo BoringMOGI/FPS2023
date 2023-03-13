@@ -4,64 +4,64 @@ using UnityEngine;
 
 public class WeaponLauncher : Weapon
 {
-    // 런처의 작동 방식.
-    // 1. 런처의 최대 에너지는 5다.
-    // 2. 런처가 차징하는 최대 시간은 5다.    
-    // 3. 차징하는 시간에 비례해 탄환이 날아가는 힘이 달라진다.
-    // 4. 차징 시 남은 에너지가 부족하면 더 이상 차징할 수 없다.
-    // 5. 에너지에 관계없이 마우스를 때면 투사체를 날린다.
-
-    // 에너지를 회복하는 것 => recovery
-    // 런처에서 파워를 모으는 것 => charge
+    Projectile projectileDisk;       // 에너지 디스크.
 
     // 런처의 에너지에 관련된 변수.
-    const float RECOVERY_TIME = 2f;     // 에너지는 2초에 걸쳐 회복된다.
-    float nextRecoveryTime;             // 총을 쏜 후 에너지를 회복할 수 있는 시간.
+    float MIN_CHARGE_TIME;  // 최소 차징 타임은 에너지 소켓 1개의 10% 분량 만큼이다.
+    float MAX_CHARGE_TIME;  // 최대 차징 타임은 에너지 소켓 1개 분량 만큼이다.
+    float chargeTime;       // 실제 차징한 시간.
 
-    // 런처의 차징과 관련된 변수.
-    const float MIN_CHARGE_TIME = 0.5f;
-    const float MAX_CHARGE_TIME = 5.0f;
-    float chargeTime;
-
-    // 투사체를 날리는 힘.
-    const float MAX_CHARGE_POWER = 20;
-
-    protected new void Update()
+    protected new void Start()
     {
-        base.Update();
+        base.Start();
 
-        if(nextRecoveryTime <= Time.time)
-        {
-            // 이번 프레임동안 흐린 시간 비율 * 최대 에너지.
-            float amount = (Time.deltaTime / RECOVERY_TIME) * maxEnergy;
-            energy = Mathf.Clamp(energy + amount, 0f, maxEnergy);
-        }
+        MAX_CHARGE_TIME = MAX_ENERGY / sockets.Length;
+        MIN_CHARGE_TIME = MAX_CHARGE_TIME * 0.4f;
     }
 
     public override void Press(MOUSE mouse)
     {
-        // 남은 에너지가 있어야 한다.
-        if(energy > 0.0f)
+        base.Press(mouse);
+
+        // 최초에 투사체가 없으면 생성한다.
+        if (projectileDisk == null)
         {
-            // 차징 시간은 최소 0 최대 MAX까지다.
-            chargeTime = Mathf.Clamp(chargeTime + Time.deltaTime, 0f, MAX_CHARGE_TIME);
-            energy = Mathf.Clamp(energy - Time.deltaTime, 0f, maxEnergy);
+            projectileDisk = Instantiate(projectilePrefab, muzzle);     // 총구(muzzle) 아래로 생성.
+            projectileDisk.transform.localPosition = Vector3.zero;      // 로컬 포지션 초기화.
+            projectileDisk.transform.localScale = Vector3.zero;         // 로컬 스케일 초기화.
         }
+
+        // 차지 타임이 최대 차지타임 이상이면 더 이상 차지할 수 없다.
+        // 더 이상 사용할 에너지가 없을 경우.
+        if (chargeTime >= MAX_CHARGE_TIME || !UseEnergy())
+            return;
+
+        chargeTime = Mathf.Clamp(chargeTime + Time.deltaTime, 0f, MAX_CHARGE_TIME);
+
+        float scale = chargeTime / MAX_CHARGE_TIME;     // 0.0 ~ 1.0 사이값.
+        projectileDisk.transform.localScale = new Vector3(scale, scale, scale);
     }
     public override void Release(MOUSE mouse)
     {
+        // Disk를 최상위 객체로 만든다.
+        projectileDisk.transform.parent = null;
+
         // 최소 차징 타임보다 커야한다.
         if (chargeTime >= MIN_CHARGE_TIME)
         {
-            float chargeRatio = chargeTime / MAX_CHARGE_TIME;       // 차징 비율.
-            float chargePower = MAX_CHARGE_POWER * chargeRatio;     // 차징 시간에 따른 파워(힘)
+            float chargeRatio = chargeTime / MAX_CHARGE_TIME;       // 차징 비율 (0f ~ 1f)
+            float chargePower = speed * chargeRatio;                // 차징 시간에 비례한 힘
 
-            // 투사체 생성 후 발사.
-            Projectile projectile = Instantiate(projectilePrefab, muzzle.position, Quaternion.identity);
-            projectile.transform.LookAt(GetCameraPoint());      // 특정 지점을 바라봐라.
-            projectile.Fire(Projectile.TYPE.Grenade, power, speed, mask);
+            // 탄환을 발사.
+            projectileDisk.Fire(power, chargePower, mask);
+        }
+        else
+        {
+            // 에너지가 최소를 넘지 못해 발사할 수 없기 때문에 삭제한다.
+            Destroy(projectileDisk.gameObject);
         }
 
         chargeTime = 0f;
+        projectileDisk = null;
     }
 }

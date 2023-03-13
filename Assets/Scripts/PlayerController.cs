@@ -28,7 +28,7 @@ public class PlayerController : MonoBehaviour
             weapon.UnEquip();
 
         // 최초에 블래스터를 장비한다.
-        ChangeWeapon(WEAPON.Blaster);
+        ChangeWeapon(WEAPON.Blaster, true);
     }
 
     // Movement의 Update에서 움직임이 끝난 이후 처리하기 위해
@@ -65,10 +65,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void ChangeWeapon(WEAPON type)
+    private void ChangeWeapon(WEAPON type, bool isForce = false)
     {
-        Weapon changeWeapon = weapons[(int)type];   // 바뀔 예정인 무기.
-        if(changeWeapon != currentWeapon)
+        Weapon changeWeapon = weapons[(int)type];           // 바뀔 예정인 무기.
+        if(changeWeapon != currentWeapon || isForce)
         {
             currentWeapon.UnEquip();        // 이전 무기 해제.
             equipWeapon = type;             // 타입 변경.
