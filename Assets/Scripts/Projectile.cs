@@ -4,27 +4,25 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    [SerializeField] protected ParticleSystem sparkFx;        // 충돌 이펙트.
+    [SerializeField] protected Vfx sparkFx;        // 충돌 이펙트.
+    [SerializeField] protected Rigidbody rigid;    // 리지드바디.
 
     protected const float MAX_DISTANCE = 100f;    // 최대 거리.
-    protected const float GRAVITY = -9.81f;       // 중력.
 
     protected float power;              // 데미지.
-    protected float speed;              // 속도.
     protected LayerMask mask;           // 레이어 마스크.
     protected Vector3 createPosition;   // 생성 지점.
-    protected Vector3 velocity;         // 중력 가속도.
 
     protected bool isFire;              // 발사 여부.
 
-    public void Fire(float power, float speed, LayerMask mask)
+    public virtual void Fire(float power, float speed, LayerMask mask)
     {
-        createPosition = transform.position;
-
         this.power = power;
-        this.speed = speed;
         this.mask = mask;
 
+        createPosition = transform.position;          // 생성 위치.
+        rigid.velocity = transform.forward * speed;   // 현재 회전 값의 정면으로 등속 운동한다. (중력 X)
+        rigid.useGravity = false;
         isFire = true;
     }
 
@@ -48,37 +46,18 @@ public class Projectile : MonoBehaviour
         if (!isFire)
             return;
 
-        RaycastHit hit;
-
-        // 다음 위치는 나의 운동량 + 중력 가속도.
-        // 그러나 일반 Bullet은 중력값을 받지 않는다.
-        Vector3 nextPoint = transform.position + transform.forward * speed * Time.deltaTime;
-        nextPoint += velocity;
-
-        if (Physics.Linecast(transform.position, nextPoint, out hit, mask))
-        {
-            OnHit(hit.collider.gameObject);
-        }
-        else if (Vector3.Distance(createPosition, transform.position) >= MAX_DISTANCE)
-        {
-            // 투사체가 최대 이동 거리를 넘어버리면 삭제.
+        // 투사체가 최대 이동 거리를 넘어버리면 삭제.
+        if (Vector3.Distance(createPosition, transform.position) >= MAX_DISTANCE)
             Destroy(gameObject);
-        }
-        else
-        {
-            transform.LookAt(nextPoint);            // 다음으로 움직일 위치를 바라본다.
-            transform.position = nextPoint;         // 이후 내 실제 위치를 변경한다.
-        }
     }
 
     protected virtual void OnHit(GameObject target)
     {
-        ParticleSystem vfx = Instantiate(sparkFx, transform.position, transform.rotation);
+        Vfx vfx = Instantiate(sparkFx, transform.position, transform.rotation);
         vfx.Play();
 
         // 충돌한 대상이 IHit을 구현하고 있다면 OnHit함수를 호출해 피격 처리.
         target.GetComponent<IHit>()?.OnHit(power);
-
         Destroy(gameObject);
     }
 }

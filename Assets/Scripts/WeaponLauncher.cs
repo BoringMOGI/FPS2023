@@ -4,6 +4,17 @@ using UnityEngine;
 
 public class WeaponLauncher : Weapon
 {
+    enum SE
+    {
+        Off = -1,
+        Start,
+        Loop,
+        Release,
+    }
+
+    [Header("Audio")]
+    [SerializeField] AudioSource[] chargeSes;
+
     Projectile projectileDisk;       // 에너지 디스크.
 
     // 런처의 에너지에 관련된 변수.
@@ -19,6 +30,29 @@ public class WeaponLauncher : Weapon
         MIN_CHARGE_TIME = MAX_CHARGE_TIME * 0.4f;
     }
 
+
+    private void PlaySe(SE type)
+    {
+        // 요청한 type SE는 재생하고 나머지는 끈다.
+        for(int i = 0; i<chargeSes.Length; i++)
+        {
+            if (type == (SE)i)
+            {
+                // 현재 재생중이 아닐 경우에만 재생할 수 있다.
+                if (!chargeSes[i].isPlaying)
+                    chargeSes[i].Play();
+            }
+            else
+            {
+                chargeSes[i].Stop();
+            }
+        }
+    }
+    private bool IsPlayingSE(SE type)
+    {
+        return chargeSes[(int)type].isPlaying;
+    }
+
     public override void Press(MOUSE mouse)
     {
         base.Press(mouse);
@@ -29,12 +63,17 @@ public class WeaponLauncher : Weapon
             projectileDisk = Instantiate(projectilePrefab, muzzle);     // 총구(muzzle) 아래로 생성.
             projectileDisk.transform.localPosition = Vector3.zero;      // 로컬 포지션 초기화.
             projectileDisk.transform.localScale = Vector3.zero;         // 로컬 스케일 초기화.
+
+            PlaySe(SE.Start);
         }
 
         // 차지 타임이 최대 차지타임 이상이면 더 이상 차지할 수 없다.
         // 더 이상 사용할 에너지가 없을 경우.
         if (chargeTime >= MAX_CHARGE_TIME || !UseEnergy())
+        {
+            PlaySe(SE.Loop);
             return;
+        }
 
         chargeTime = Mathf.Clamp(chargeTime + Time.deltaTime, 0f, MAX_CHARGE_TIME);
 
@@ -54,10 +93,14 @@ public class WeaponLauncher : Weapon
 
             // 탄환을 발사.
             projectileDisk.Fire(power, chargePower, mask);
+
+            // 사운드 이펙트 재생.            
+            PlaySe(SE.Release);
         }
         else
         {
             // 에너지가 최소를 넘지 못해 발사할 수 없기 때문에 삭제한다.
+            PlaySe(SE.Off);
             Destroy(projectileDisk.gameObject);
         }
 

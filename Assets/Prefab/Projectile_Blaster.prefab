@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4571218798354419571}
   - component: {fileID: 4571218798357811027}
   - component: {fileID: 4571218798356843923}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: Mesh_Projectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4571218798354846547}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.025}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 657295359066450110}
   - component: {fileID: 8828519438678678880}
   - component: {fileID: 4872444070224475922}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: Projectile_Blaster
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -110,7 +110,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8728066724400592264}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.9443598, y: 0, z: 1.1094456}
+  m_LocalPosition: {x: 3.9443598, y: 0, z: 0.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -130,7 +130,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9cc9d48a7f8a64b8759eb00df8a2de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sparkFx: {fileID: 2379830179813025156, guid: 0ef75fe1717563c4e84f875b8eb25316, type: 3}
+  sparkFx: {fileID: 6571625488642560917, guid: 0ef75fe1717563c4e84f875b8eb25316, type: 3}
+  rigid: {fileID: 4872444070224475922}
 --- !u!135 &8828519438678678880
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -156,7 +157,7 @@ Rigidbody:
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 0
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 2
